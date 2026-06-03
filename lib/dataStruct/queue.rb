@@ -10,7 +10,7 @@ class Queue
   end
 
   def push(value)
-    @list.append(Node.new(value))
+    @list.append(ListNode.new(value))
   end
 
   def pop
@@ -21,5 +21,9 @@ class Queue
 
   def empty?
     @list.empty?
+  end
+
+  def size
+    @list.length
   end
 end

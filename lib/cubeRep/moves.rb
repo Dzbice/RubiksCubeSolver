@@ -26,6 +26,15 @@ module Moves
     'R2' => 'R'
   }
 
+  OPPOSITE = {
+    'R' => 'L',
+    'L' => 'R',
+    'U' => 'D',
+    'D' => 'U',
+    'F' => 'B',
+    'B' => 'F'
+  }
+
   def apply_move(cube, move)
     edge_move(cube, move)
     corner_move(cube, move)

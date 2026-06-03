@@ -1,8 +1,10 @@
 require_relative 'lib/cubeRep/cube'
+require_relative 'lib/dbmake/corner_pattern_db'
 
-cube = Cube.new
-puts cube.cube.join(' ')
-6.times do
-  cube.moves("R U R' U'")
-  puts cube.cube.join(' ')
+db = CornerPatternDb.new
+if File.exist?('resources/corner_pdb.dat')
+  db.load('resources/corner_pdb.dat')
+else
+  db.makeDB
+  db.save('resources/corner_db.dat')
 end

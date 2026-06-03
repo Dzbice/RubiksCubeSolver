@@ -1,8 +1,10 @@
 class TreeNode
-  attr_accessor :state, :sequence
+  attr_accessor :state, :sequence, :depth
 
-  def initialize(state, sequence)
+  def initialize(state, sequence, depth)
     @state = state
-    @sequeunce = sequence
+    @sequence = sequence
+    @depth = depth
+    @after = nil
   end
 end

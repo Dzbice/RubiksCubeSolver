@@ -22,6 +22,7 @@ class LinkedList
     if @head == @tail
       @head = nil
       @tail = nil
+      @length -= 1
       return
     end
     @head = @head.after
