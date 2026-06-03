@@ -15,7 +15,7 @@ class CornerPatternDb
   end
 
   def make_moves
-    base_moves = %w[R U D F B L]
+    base_moves = %w[R L U D F B]
     moves = []
     base_moves.each do |x|
       moves << x
@@ -34,7 +34,9 @@ class CornerPatternDb
       node = queue.pop.value
       addMoves(queue, node)
       count += 1
-      puts "So far: #{count}, queue is: #{queue.size} elements rn" if (count % 10_000).zero?
+      if (count % 10_000).zero?
+        puts "So far: #{count} |  depth is: #{node.depth} |  queue is: #{queue.size} elements rn"
+      end
     end
   end
 
@@ -43,6 +45,7 @@ class CornerPatternDb
       last = node.sequence.split(' ').last
       # Doing R twice or R and then R' is redundant since that could've been done in 0-1 moves
       next if last && move[0] == last[0]
+
       # opposites are communative so does them in same order to save time
       next if last && Moves::OPPOSITE[move[0]] == last[0] && move[0] > last[0]
 
@@ -63,7 +66,9 @@ class CornerPatternDb
     mask = 0
     state.each_with_index do |x, i|
       id = x / 3
-      lehmer += BITS[mask >> (size - id)] * FACTORIALS[size - 1 - i]
+      lehmer += BITS[~mask & ((1 << id) - 1)] * FACTORIALS[7 - i]
+      # basically we make a bitmask for everything below id, we check what we haven't see
+      # see how many is in there, then get our weighing
       mask |= (1 << id)
     end
     lehmer
