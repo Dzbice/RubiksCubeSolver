@@ -28,35 +28,35 @@ class CornerPatternDb
   def makeDB
     count = 0
     queue = Queue.new
-    node = TreeNode.new(@solved_arr.dup, '', 0)
+    node = [@solved_arr[0..7].dup, 0, '']
     queue.push(node)
     until queue.empty?
-      node = queue.pop.value
-      addMoves(queue, node)
+      node = queue.pop
+      addMoves(queue, node.value[0], node.value[1], node.value[2])
       count += 1
       if (count % 10_000).zero?
-        puts "So far: #{count} |  depth is: #{node.depth} |  queue is: #{queue.size} elements rn"
+        puts "So far: #{count} |  depth is: #{node.value[1]} |  queue is: #{queue.size} elements rn"
       end
     end
   end
 
-  def addMoves(queue, node)
+  def addMoves(queue, node, depth, last)
     @moves.each do |move|
-      last = node.sequence.split(' ').last
       # Doing R twice or R and then R' is redundant since that could've been done in 0-1 moves
       next if last && move[0] == last[0]
 
       # opposites are communative so does them in same order to save time
       next if last && Moves::OPPOSITE[move[0]] == last[0] && move[0] > last[0]
 
-      new_state = node.state.dup
+      new_state = node.dup
       parse_move(new_state, move)
-      corner_state = new_state[0..7]
+      corner_state = new_state
+
       next if @table[encode(corner_state)] != -1
 
-      newnode = TreeNode.new(new_state, "#{node.sequence} #{move}", node.depth + 1)
-      @table[encode(corner_state)] = newnode.depth
-      queue.push(newnode)
+      @table[encode(corner_state)] = depth + 1
+
+      queue.push([new_state, depth + 1, move])
     end
   end
 

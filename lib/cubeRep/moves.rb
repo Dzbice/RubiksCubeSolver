@@ -36,10 +36,23 @@ module Moves
   }
 
   def apply_move(cube, move)
-    edge_move(cube, move)
-    corner_move(cube, move)
-    edge_orient(cube, move)
-    corner_orient(cube, move)
+    if cube.length <= 8
+      corner_move(cube, move)
+      corner_orient(cube, move)
+    elsif cube.length > 8 && cube.length < 20
+      edge_move(cube, move)
+      edge_orient(cube, move)
+    else
+      edge_move(cube, move)
+      corner_move(cube, move)
+      edge_orient(cube, move)
+      corner_orient(cube, move)
+    end
+  end
+
+  def corner_apply(corner_state, move)
+    corner_move(corner_state, move)
+    corner_orient(corner_state, move)
   end
 
   def corner_move(cube, move)
@@ -78,12 +91,29 @@ module Moves
     end
   end
 
+  def edge_apply(edge_state, move)
+    edge_move(edge_state, move)
+    edge_orient(edge_state, move)
+  end
+
   def double_move(cube, move)
-    2.times { apply_move(cube, move) }
+    if cube.length <= 8
+      2.times { corner_apply(cube, move) }
+    elsif cube.length > 8 && cube.length < 20
+      2.times { edge_apply(cube, move) }
+    else
+      2.times { apply_move(cube, move) }
+    end
   end
 
   def inverse_move(cube, move)
-    3.times { apply_move(cube, move) }
+    if cube.length <= 8
+      3.times { corner_apply(cube, move) }
+    elsif cube.length > 8 && cube.length < 20
+      3.times { edge_apply(cube, move) }
+    else
+      3.times { apply_move(cube, move) }
+    end
   end
 
   def parse_move(cube, move)
