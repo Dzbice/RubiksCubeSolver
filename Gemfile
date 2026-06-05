@@ -1,3 +1,4 @@
-source "https://rubygems.org"
-gem 'rubocop',require: false
-gem "rspec"
+source 'https://rubygems.org'
+gem 'debug'
+gem 'rspec'
+gem 'rubocop', require: false

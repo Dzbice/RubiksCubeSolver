@@ -3,6 +3,8 @@ require_relative '../dataStruct/queue'
 require_relative '../cubeRep/moves'
 require_relative '../dataStruct/tree_node'
 require_relative '../dataStruct/list_node'
+
+require 'objspace'
 class CornerPatternDb
   include Moves
   BITS = (0..2**8 - 1).map { |x| x.to_s(2).count('1') }
@@ -28,7 +30,7 @@ class CornerPatternDb
   def makeDB
     count = 0
     queue = Queue.new
-    node = [@solved_arr[0..7].dup, 0, '']
+    node = [encode(@solved_arr[0..7].dup), 0, '']
     queue.push(node)
     until queue.empty?
       node = queue.pop
@@ -48,22 +50,22 @@ class CornerPatternDb
       # opposites are communative so does them in same order to save time
       next if last && Moves::OPPOSITE[move[0]] == last[0] && move[0] > last[0]
 
-      new_state = node.dup
+      new_state = decode(node)
       parse_move(new_state, move)
-      corner_state = new_state
+      corner_state = encode(new_state)
+      next if @table[corner_state] != -1
 
-      next if @table[encode(corner_state)] != -1
+      @table[corner_state] = depth + 1
 
-      @table[encode(corner_state)] = depth + 1
-
-      queue.push([new_state, depth + 1, move])
+      queue.push([corner_state, depth + 1, move])
     end
   end
 
-  def lehmer(size, state)
+  def lehmer(state)
     lehmer = 0
 
     mask = 0
+
     state.each_with_index do |x, i|
       id = x / 3
       lehmer += BITS[~mask & ((1 << id) - 1)] * FACTORIALS[7 - i]
@@ -79,12 +81,47 @@ class CornerPatternDb
     state[0..6].each_with_index.sum { |x, i| (x % 3) * (3**(6 - i)) }
   end
 
-  # the pattern databae needs perfect hashing with no collisions, for permutations a solution exsists known as an objects
+  # the pattern database needs perfect hashing with no collisions, for permutations a solution exsists known as an objects
   #  leher code
   def encode(state)
-    index = lehmer(state.size, state)
+    index = lehmer(state)
     ori = orientation_id(state)
     index * 2187 + ori
+  end
+
+  def decode(state)
+    orientations = recode_orientation(state % 2187)
+    index = decode_lehmer(state / 2187)
+    decoded = Array.new(8)
+    index.each_with_index do |x, i|
+      decoded[i] = x * 3 + orientations[i]
+    end
+    decoded
+  end
+
+  def recode_orientation(ori)
+    twist = Array.new(8)
+    sum = 0
+    7.times do |i|
+      power = 3**(6 - i)
+      twist[i] = ori / power
+      ori %= power
+      sum += twist[i]
+    end
+    twist[7] = (3 - sum % 3) % 3
+    twist
+  end
+
+  def decode_lehmer(index)
+    base = [0, 1, 2, 3, 4, 5, 6, 7]
+    decoded = Array.new(8)
+    8.times do |i|
+      fact = FACTORIALS[7 - i]
+      digit = index / fact
+      index %= fact
+      decoded[i] = base.delete_at(digit)
+    end
+    decoded
   end
 
   def save(path)
